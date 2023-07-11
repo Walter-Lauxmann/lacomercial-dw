@@ -3,6 +3,6 @@
 define('DB_HOST', 'localhost'); // Servidor MySQL
 define('DB_USER', 'root'); // Usuario del servidor MySQL
 define('DB_PASS', ''); // Contraseña del servidor MySQL
-define('DB_NAME', 'ventas'); // Nombre de la Base de Datos
+define('DB_NAME', 'gestionventas'); // Nombre de la Base de Datos
 define('DB_CHARSET', 'utf8'); // Cotejamiento del conjunto de caracteres
 ?>

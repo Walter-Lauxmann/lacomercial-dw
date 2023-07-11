@@ -77,5 +77,39 @@ class ModeloABM extends Modelo {
         $this->limit = $limit;
     }
 
+
+    /** Método de Selección de datos */
+    public function seleccionar() {
+        // SELECT * FROM articulos WHERE criterio ORDER BY campo LIMIT 10
+        $sql = "SELECT $this->campos FROM $this->tabla"; // SELECCIONAR $campos DESDE $tabla
+        // Si el $criterio NO es igual a NADA
+        if($this->criterio != '') {
+           $sql .= " WHERE $this->criterio"; // DONDE $criterio 
+        }
+        // Agregamos el orden
+        $sql .= " ORDER BY $this->orden"; // ORDENADO POR $orden
+        // Si $limit es mayor que cero
+        if($this->limit > 0) {
+            // Agregamos el límite
+            $sql .= " LIMIT $this->limit"; 
+        }
+        // echo $sql.'<br>'; // Mostramos la instrucción SQL resultante
+
+        // Ejecutamos la consulta y la guardamos en $resultado
+        $resultado = $this->_db->query($sql);
+
+        // Guardamos los datos en un array asociativo
+        $datos = $resultado->fetch_all(MYSQLI_ASSOC);
+        // print_r($datos);
+
+        // Convertimos los datos al formato JSON
+        $datos_json = json_encode($datos);
+        // print_r($datos_json);
+
+        // Retornamos los datos JSON
+        return $datos_json;
+
+    }
+    
+
 }
-?>
