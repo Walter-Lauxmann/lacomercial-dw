@@ -2,6 +2,9 @@ import { obtenerArticulos } from "../modelos/articulos";
 
 const url = './api/datos.php?tabla=articulos';
 
+// Alerta
+const alerta = document.querySelector('#alerta');
+
 // Formulario
 const formulario = document.querySelector('#formulario');
 const formularioModal = new bootstrap.Modal(document.querySelector('#formularioModal'));
@@ -25,6 +28,7 @@ async function mostrarArticulos() {
   const articulos = await obtenerArticulos();
   console.log(articulos);
   const listado = document.querySelector("#listado"); // getElementById("listado")
+  listado.innerHTML = '';
   for (let articulo of articulos) {
     listado.innerHTML += `
               <div class="col">
@@ -58,6 +62,7 @@ formulario.addEventListener('submit', function(e) {
     })
     .then(res => res.json())
     .then(data => {
+        insertarAlerta(data, 'success');
         mostrarArticulos();
     })
 })
@@ -76,3 +81,19 @@ btnNuevo.addEventListener('click', () => {
     // Mostramos el formulario
     formularioModal.show();
 })
+
+/**
+ * Define el mensaje de alerta
+ * @param mensaje el mensaje a mostrar
+ * @param tipo el tipo de alerta
+ */
+const insertarAlerta = (mensaje, tipo) => {
+    const envoltorio = document.createElement('div');
+    envoltorio.innerHTML = `
+    <div class="alert alert-${tipo} alert-dismissible" role="alert">
+        <div>${mensaje}</div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    `;
+    alerta.append(envoltorio);
+}

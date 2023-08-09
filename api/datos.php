@@ -1,6 +1,8 @@
 <?php
 require_once 'modelos.php'; // Requerimos el archivo de clases modelo.php
 
+$mensaje = '';
+
 if (isset($_GET['tabla'])) { // Si está seteado el atributo tabla
     $t = $_GET['tabla'];
 
@@ -15,6 +17,8 @@ if (isset($_GET['tabla'])) { // Si está seteado el atributo tabla
             case 'insertar':                        // En caso que sea 'insertar'
                 $valores = $_POST;
                 $tabla->insertar($valores);         // Ejecutamos el método insertar()
+                $mensaje .= 'Datos guardados';
+                echo json_encode($mensaje);
                 break;
         }
     }    

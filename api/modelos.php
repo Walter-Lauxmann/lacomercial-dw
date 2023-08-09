@@ -133,7 +133,7 @@ class ModeloABM extends Modelo {
 
         // Instrucción SQL
         $sql = "INSERT INTO $this->tabla($campos) VALUES($datos)";
-        echo $sql; // Mostramos la instrucción SQL resultante
+        // echo $sql; // Mostramos la instrucción SQL resultante
         $this->_db->query($sql); // Ejecutamos la instrucción SQL
     }
     
