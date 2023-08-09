@@ -94,7 +94,6 @@
         type="button"
         class="btn btn-primary"
         data-bs-toggle="modal"
-        data-bs-target="#formularioModal"
         id="btnNuevo"
       >
         Nuevo Artículo
@@ -192,7 +191,7 @@
                       </div>
                       <div class="input-group mb-3">
                         <span class="input-group-text">$</span>
-                        <div class="form-floating">                          
+                        <div class="form-floating">
                           <input
                             type="number"
                             name="precio"
@@ -205,8 +204,15 @@
                       </div>
                     </div>
                     <div class="mb-3">
-                        <label for="imagen" class="form-label">Seleccionar imagen</label>
-                        <input class="form-control" type="file" id="imagen" name="imagen">
+                      <label for="imagen" class="form-label"
+                        >Seleccionar imagen</label
+                      >
+                      <input
+                        class="form-control"
+                        type="file"
+                        id="imagen"
+                        name="imagen"
+                      />
                     </div>
                   </div>
                 </div>
@@ -220,7 +226,13 @@
               >
                 Cerrar
               </button>
-              <button type="submit" class="btn btn-primary">Guardar</button>
+              <button
+                type="submit"
+                class="btn btn-primary"
+                data-bs-dismiss="modal"
+              >
+                Guardar
+              </button>
             </div>
           </div>
         </form>
