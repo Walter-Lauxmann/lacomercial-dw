@@ -33,7 +33,7 @@ async function mostrarArticulos() {
     listado.innerHTML += `
               <div class="col">
                 <div class="card" style="width:18rem;">
-                    <img src="imagenes/productos/${articulo.imagen}" alt="${articulo.nombre}" class="card-img-top">
+                    <img src="imagenes/productos/${articulo.imagen ?? 'nodisponible.png'}" alt="${articulo.nombre}" class="card-img-top">
                     <div class="card-body">
                         <h5 class="card-title">
                             <span name="spancodigo">${articulo.codigo}</span> - <span name="spannombre">${articulo.nombre}</span>
@@ -77,6 +77,7 @@ btnNuevo.addEventListener('click', () => {
     inputDescripcion.value = null;
     inputPrecio.value = null;
     inputImagen.value = null;
+    frmImagen.src = './imagenes/productos/nodisponible.png';
 
     // Mostramos el formulario
     formularioModal.show();

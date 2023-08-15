@@ -136,6 +136,25 @@ class ModeloABM extends Modelo {
         // echo $sql; // Mostramos la instrucción SQL resultante
         $this->_db->query($sql); // Ejecutamos la instrucción SQL
     }
+
+    /**
+     * Método para actualizar datos
+     * @param valores los valores a actualizar
+     */
+    public function actualizar($valores) {
+        // UPDATE articulos SET campo1='valor1', campo2='valor2'... WHERE id=1
+        $sql = "UPDATE $this->tabla SET ";
+        // Recorrer el objeto $valores
+        foreach($valores as $key => $value) {
+            // Agregamos al sql los campos y valores
+            $sql .= $key."='".$value."',";
+        }
+        $sql = substr($sql,0,strlen($sql)-1); // Quitamos el último caracter (,) a $sql
+        // Agregamos el criterio
+        $sql .= " WHERE $this->criterio";
+        echo $sql; // Mostramos el SQL resultante
+        $this->_db->query($sql); // Ejecutamos la consulta
+    }
     
 
 }
