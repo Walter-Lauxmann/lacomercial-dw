@@ -31,6 +31,12 @@ if (isset($_GET['tabla'])) { // Si está seteado el atributo tabla
                 $mensaje .= 'Datos actualizados';   // Creamos un mensaje
                 echo json_encode($mensaje);         // Mostramos el mensaje
                 break;
+
+            case 'eliminar':                        // En caso que sea 'eliminar'
+                $tabla->eliminar();                 // Ejecutamos el método eliminar
+                $mensaje = 'Registro eliminado';    // Creamos un mensaje
+                echo json_encode($mensaje);         // Mostramos el mensaje
+                break;
         }
     }    
 }

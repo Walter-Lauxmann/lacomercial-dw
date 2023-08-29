@@ -162,7 +162,7 @@ const on = (elemento, evento, selector, manejador) => {
 /**
  * Ejecuta el clic de btnEditar
  */
-on(document, 'click', '.btnEditar', (e) => {
+on(document, "click", ".btnEditar", (e) => {
   const cardFooter = e.target.parentNode; // Elemento padre del botón
   // Obtener los datos del artículo seleccionado
   id = cardFooter.querySelector(".idArticulo").value;
@@ -177,8 +177,7 @@ on(document, 'click', '.btnEditar', (e) => {
   ).innerHTML;
   const descripcion =
     cardFooter.parentNode.querySelector(".card-text").innerHTML;
-  const imagen =
-    cardFooter.parentNode.querySelector(".imagenArticulo").value;
+  const imagen = cardFooter.parentNode.querySelector(".imagenArticulo").value;
 
   // Asignamos los valores a los input
   inputCodigo.value = codigo;
@@ -191,4 +190,23 @@ on(document, 'click', '.btnEditar', (e) => {
   formularioModal.show();
 
   accion = "actualizar";
+});
+
+/**
+ * Evento click del botón borrar
+ */
+on(document, 'click', '.btnBorrar', e => {
+  const cardFooter = e.target.parentNode;
+  id = cardFooter.querySelector('.idArticulo').value;
+  const nombre = cardFooter.parentNode.querySelector("span[name=spannombre]").innerHTML;
+  let aceptar = confirm(`¿Realmente desea eliminar a ${nombre}?`);
+  if(aceptar) {
+    console.log(`${nombre} Eliminado`);
+    fetch(`${url}&accion=eliminar&id=${id}`)
+      .then(res => res.json())
+      .then(data => {
+        insertarAlerta(data, 'danger');
+        mostrarArticulos();
+      });
+  }
 });
