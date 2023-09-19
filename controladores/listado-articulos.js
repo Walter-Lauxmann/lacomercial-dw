@@ -5,6 +5,9 @@ const url = "./api/datos.php?tabla=articulos";
 // Alerta
 const alerta = document.querySelector("#alerta");
 
+// Login de la navegación
+const navLogin = document.querySelector("#nav-login");
+
 // Formulario
 const formulario = document.querySelector("#formulario");
 const formularioModal = new bootstrap.Modal(
@@ -26,7 +29,35 @@ const frmImagen = document.querySelector("#frmimagen");
 let accion = "";
 let id;
 
+// Variables de inicio de sesión
+let usuario = "";
+let logueado = false;
+
+// Control de usuario
+const controlUsuario = () => { // function controlUsuario() {}
+  if (sessionStorage.getItem("usuario")) {
+    usuario = sessionStorage.getItem("usuario");
+    logueado = true;
+  }
+
+  if (logueado) {
+    navLogin.setAttribute("href", "#");
+    navLogin.innerHTML = "Cerrar sesión";
+    btnNuevo.style.display = "inline";
+    navLogin.addEventListener("click", () => {
+      sessionStorage.setItem("usuario", "");
+      logueado = false;
+      window.location.reload();
+    });
+  } else {
+    navLogin.setAttribute("href", "login.html");
+    navLogin.innerHTML = "Iniciar sesión";
+    btnNuevo.style.display = "none";
+  }
+};
+
 document.addEventListener("DOMContentLoaded", () => {
+  controlUsuario();
   mostrarArticulos();
 });
 
@@ -39,41 +70,48 @@ async function mostrarArticulos() {
   const listado = document.querySelector("#listado"); // getElementById("listado")
   listado.innerHTML = "";
   for (let articulo of articulos) {
-    listado.innerHTML += `
+    if(logueado) {
+      listado.innerHTML += `
               <div class="col">
                 <div class="card" style="width:18rem;">
-                    <img src="imagenes/productos/${
-                      articulo.imagen ?? "nodisponible.png"
-                    }" alt="${articulo.nombre}" class="card-img-top">
+                    <img src="imagenes/productos/${articulo.imagen ?? "nodisponible.png"}" alt="${articulo.nombre}" class="card-img-top">
                     <div class="card-body">
                         <h5 class="card-title">
-                            <span name="spancodigo">${
-                              articulo.codigo
-                            }</span> - <span name="spannombre">${
-      articulo.nombre
-    }</span>
+                            <span name="spancodigo">${articulo.codigo}</span> - <span name="spannombre">${articulo.nombre}</span>
                         </h5>
                         <p class="card-text">
                             ${articulo.descripcion}.
                         </p>
-                        <h5>$ <span name="spanprecio">${
-                          articulo.precio
-                        }</span></h5>
+                        <h5>$ <span name="spanprecio">${articulo.precio}</span></h5>
                         <input type="number" name="inputcantidad" class="form-control" value="0" min="0" max="30" onchange="calcularPedido()">
                     </div>
-                    <div class"card-footer d-flex justify-content-center">
-                        <a class="btnEditar btn btn-primary">Editar</a>
-                        <a class="btnBorrar btn btn-danger">Eliminar</a>
-                        <input type="hidden" class="idArticulo" value="${
-                          articulo.id
-                        }">
-                        <input type="hidden" class="imagenArticulo" value="${
-                          articulo.imagen ?? "nodisponible.png"
-                        }">
+                      <div class"card-footer d-flex justify-content-center">
+                          <a class="btnEditar btn btn-primary">Editar</a>
+                          <a class="btnBorrar btn btn-danger">Eliminar</a>
+                          <input type="hidden" class="idArticulo" value="${articulo.id}">
+                          <input type="hidden" class="imagenArticulo" value="${articulo.imagen ?? "nodisponible.png"}">
+                      </div>
                     </div>
-                </div>
-            </div>
-`;
+            </div>`;
+    } else {
+      listado.innerHTML += `
+              <div class="col">
+                <div class="card" style="width:18rem;">
+                    <img src="imagenes/productos/${articulo.imagen ?? "nodisponible.png"}" alt="${articulo.nombre}" class="card-img-top">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <span name="spancodigo">${articulo.codigo}</span> - <span name="spannombre">${articulo.nombre}</span>
+                        </h5>
+                        <p class="card-text">
+                            ${articulo.descripcion}.
+                        </p>
+                        <h5>$ <span name="spanprecio">${articulo.precio}</span></h5>
+                        <input type="number" name="inputcantidad" class="form-control" value="0" min="0" max="30" onchange="calcularPedido()">
+                    </div>
+                  </div>
+            </div>`;
+    }
+    
   }
 }
 
@@ -195,17 +233,19 @@ on(document, "click", ".btnEditar", (e) => {
 /**
  * Evento click del botón borrar
  */
-on(document, 'click', '.btnBorrar', e => {
+on(document, "click", ".btnBorrar", (e) => {
   const cardFooter = e.target.parentNode;
-  id = cardFooter.querySelector('.idArticulo').value;
-  const nombre = cardFooter.parentNode.querySelector("span[name=spannombre]").innerHTML;
+  id = cardFooter.querySelector(".idArticulo").value;
+  const nombre = cardFooter.parentNode.querySelector(
+    "span[name=spannombre]"
+  ).innerHTML;
   let aceptar = confirm(`¿Realmente desea eliminar a ${nombre}?`);
-  if(aceptar) {
+  if (aceptar) {
     console.log(`${nombre} Eliminado`);
     fetch(`${url}&accion=eliminar&id=${id}`)
-      .then(res => res.json())
-      .then(data => {
-        insertarAlerta(data, 'danger');
+      .then((res) => res.json())
+      .then((data) => {
+        insertarAlerta(data, "danger");
         mostrarArticulos();
       });
   }
