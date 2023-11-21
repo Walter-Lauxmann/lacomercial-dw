@@ -1,169 +1,177 @@
-<?php
-require_once 'config.php'; // Requerimos el archivo config.php
+<?php  
+require_once("config.php"); // Incluímos el archivo de configuración con las constantes
 
-/* Definir la clase principal */
-class Modelo {
-    // Propiedades
-    protected $_db;
-
-    // Constructor con la conexión a la BD
-    public function __construct() {
-        $this->_db = new mysqli(DB_HOST,DB_USER,DB_PASS,DB_NAME);
-        // Si se produce un error de conexión, muestra el error
-        if( $this->_db->connect_errno ) {
-            echo 'Fallo al conectar a MySQL: '.$this->_db->connect_error;
-            return;
-        } 
-        // Establecemos el conjunto de caracteres a utf8
-        $this->_db->set_charset(DB_CHARSET);
-        $this->_db->query("SET NAMES 'utf8'");
-    }
+/* Establecemos los encabezados de la conexión */
+header('Access-Control-Allow-Origin: *');
+header("Access-Control-Allow-Headers: X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Request-Method");
+header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE");
+header("Allow: GET, POST, OPTIONS, PUT, DELETE");
+$method = $_SERVER['REQUEST_METHOD'];
+if($method == "OPTIONS") {
+    die();
 }
-/* Fin de la clase principal */
 
-/* Clase ModeloABM basada en la clase principal */
-class ModeloABM extends Modelo {
-    // Propiedades
-    private $tabla;          // Nombre de la tabla
-    private $id = 0;         // Id del registro
-    private $criterio = '';  // Criterio para las consultas
-    private $campos = '*';   // Lista de campos
-    private $orden = 'id';   // Campo de ordenamiento
-    private $limit = 0;      // Cantidad de registros
+/* Clase Conexion */
+class Conexion{ 
+    // Definimos la propiedad _db
+    protected $_db; 
+    // Creamos el constructor con la conexión a la Base de Datos
+    public function __construct(){ 
+        $this->_db = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME); 
+        // Si se produce un error de conexión, muestra un mensaje de error
+        if ( $this->_db->connect_errno ){ 
+            echo "Fallo al conectar a MySQL: ". $this->_db->connect_error; 
+            return;     
+        } 
+        // Establecemos el conjunto de caracteres utf8
+        $this->_db->set_charset(DB_CHARSET);
+        $this->_db->query("SET NAMES 'utf8'"); 
+    } 
+} 
+/* Fin de la clase conexion */
 
-    // Constructor
-    public function __construct($t) {
-        parent::__construct();   // Ejecutamos el constructor padre
-        $this->tabla = $t;       // Asignamos a $tabla el parámetro $t
+/* Clase Modelo basada en Conexion */
+class Modelo extends Conexion{
+    protected $tabla;          // nombre de la tabla
+    protected $id= 0;          // id del registro
+    protected $criterio= '';   // criterio para las consultas
+    protected $orden= 'id';    // campo de ordenamiento
+    protected $campos= '*';    // lista de campos
+    protected $limite= 0;       // cantidad de registros
+    protected $json= true;     // resultados en formato JSON
+
+    public function __construct($t){ 
+        parent::__construct(); 
+        $this->tabla= $t;
     }
 
-    /* GETTER */
-    public function get_tabla() {
-        return $this->tabla;
-    }
-    public function get_id() {
+    // Métodos Getter
+    public function get_id(){
         return $this->id;
     }
-    public function get_criterio() {
+    public function get_criterio(){
         return $this->criterio;
     }
-    public function get_campos() {
-        return $this->campos;
-    }
-    public function get_orden() {
+    public function get_orden(){
         return $this->orden;
     }
-    public function get_limit() {
-        return $this->limit;
+    public function get_campos(){
+        return $this->campos;
+    }
+    public function get_limite(){
+        return $this->limite;
+    }
+    public function get_json(){
+        return $this->json;
     }
 
-    /* SETTER */
-    public function set_tabla($tabla) {
-        $this->tabla = $tabla;
-    }
-    public function set_id($id) {
+    // Métodos Setter
+    public function set_id($id){
         $this->id = $id;
     }
-    public function set_criterio($criterio) {
+    public function set_criterio($criterio){
         $this->criterio = $criterio;
     }
-    public function set_campos($campos) {
-        $this->campos = $campos;
-    }
-    public function set_orden($orden) {
+    public function set_orden($orden){
         $this->orden = $orden;
     }
-    public function set_limit($limit) {
-        $this->limit = $limit;
+    public function set_campos($campos){
+        $this->campos = $campos;
+    }
+    public function set_limite($limite){
+        $this->limite = $limite;
+    }
+    public function set_json($json){
+        $this->json = $json;
     }
 
+    // Método de conexión 
+    public function conexion(){
+        return $this->_db;
+    }
 
-    /** 
-     * Método de Selección de datos 
+    /**
+     * Método de selección.
+     * Selecciona los registros de una tabla
+     * y los devuelve en formato JSON
+     * @return datos los datos en formato JSON
      */
     public function seleccionar() {
-        // SELECT * FROM articulos WHERE criterio ORDER BY campo LIMIT 10
-        $sql = "SELECT $this->campos FROM $this->tabla"; // SELECCIONAR $campos DESDE $tabla
-        // Si el $criterio NO es igual a NADA
+        // SELECT * FROM articulos WHERE nombre LIKE '%samsung%' ORDER BY id LIMIT 10
+        $sql = "SELECT $this->campos FROM $this->tabla";
+        // Si el criterio NO es igual a NADA
         if($this->criterio != '') {
-           $sql .= " WHERE $this->criterio"; // DONDE $criterio 
+            $sql .= " WHERE $this->criterio"; // DONDE criterio
         }
-        // Agregamos el orden
-        $sql .= " ORDER BY $this->orden"; // ORDENADO POR $orden
-        // Si $limit es mayor que cero
-        if($this->limit > 0) {
-            // Agregamos el límite
-            $sql .= " LIMIT $this->limit"; 
+        // Agregamos el ordenamiento
+        $sql .= " ORDER BY $this->orden";
+        // Si el límite es mayor que cero
+        if($this->limite > 0) {
+            $sql .= " LIMIT $this->limite";
         }
-        // echo $sql.'<br>'; // Mostramos la instrucción SQL resultante
-
+        // echo $sql . '<br>'; // Mostramos la instrucción SQL resultante
         // Ejecutamos la consulta y la guardamos en $resultado
         $resultado = $this->_db->query($sql);
-
-        // Guardamos los datos en un array asociativo
-        $datos = $resultado->fetch_all(MYSQLI_ASSOC);
-        // print_r($datos);
-
-        // Convertimos los datos al formato JSON
-        $datos_json = json_encode($datos);
-        // print_r($datos_json);
-
-        // Retornamos los datos JSON
-        return $datos_json;
+        // Obtenemos el resultado en array asociativo y lo transformamos a JSON
+        $datos = json_encode($resultado->fetch_all(MYSQLI_ASSOC));
+        // Retornamos los datos
+        return $datos;
     }
 
     /**
-     * Método de Inserción datos
-     * @param valores los valores a insertar
+     * Método de inserción de datos
+     * Inserta registros en una tabla
+     * @param valores : los valores a insertar
      */
-    public function insertar($valores) {
-        // INSERT INTO articulos(codigo, nombre, descripcion, precio, imagen)
-        // VALUES ('201', 'Samsung Galaxy S20', 'Procesador: xxx, Almacenamiento: xxx', '890000', 'samsung-galaxy-s20.jpg')
-        $campos = ''; // Variable para almacenar los campos
-        $datos = '';  // Variable para almacenar los datos
-
-        // Recorrer el objeto $valores
-        foreach($valores as $key=>$value) {
-            $value = "'".$value."'"; // Agregamos apóstrofe (') antes y después de cada value
-            $campos .= $key.","; // Agregamos en $campos, la $key más una coma
-            $datos .= $value.","; // Agregamos en $datos, los $value más una coma
-        }
-        $campos = substr($campos,0,strlen($campos)-1); // Quitamos el último caracter (,) a $campos
-        $datos = substr($datos,0,strlen($datos)-1); // Quitamos el último caracter (,) a $datos
-
-        // Instrucción SQL
-        $sql = "INSERT INTO $this->tabla($campos) VALUES($datos)";
-        // echo $sql; // Mostramos la instrucción SQL resultante
-        $this->_db->query($sql); // Ejecutamos la instrucción SQL
-    }
-
-    /**
-     * Método para actualizar datos
-     * @param valores los valores a actualizar
-     */
-    public function actualizar($valores) {
-        // UPDATE articulos SET campo1='valor1', campo2='valor2'... WHERE id=1
-        $sql = "UPDATE $this->tabla SET ";
-        // Recorrer el objeto $valores
-        foreach($valores as $key => $value) {
-            // Agregamos al sql los campos y valores
-            $sql .= $key."='".$value."',";
-        }
-        $sql = substr($sql,0,strlen($sql)-1); // Quitamos el último caracter (,) a $sql
-        // Agregamos el criterio
-        $sql .= " WHERE $this->criterio";
-        // echo $sql; // Mostramos el SQL resultante
+    public function insertar($valores){
+        // INSERT INTO productos(codigo,nombre,descripcion,precio,stock,imagen, id_proveedor)
+        // VALUES ('201','Motorola G9', 'Un gran teléfono', '45000','10','motorolag9.jpg','1')
+        $atributos='';
+        $datos='';
+        unset($valores->id);
+        // Para cada $valores como $key => $value
+        foreach ($valores as $key => $value) {
+            $value= "'".$value."'"; // Agregamos apóstrofe (') antes y después de cada $value
+            $atributos .= $key.","; // Agregamos a la variable $campo el $key y una coma (,)
+            $datos .= $value.",";  // Agregamos a la variable $datos el $value y una coma (,)
+        }        
+        $atributos= substr($atributos,0,strlen($atributos)-1); // Quitamos el último caracter (,) a $atributos
+        $datos= substr($datos,0,strlen($datos)-1);    // Quitamos el último caracter (,) a $datos
+        // Guardamos en la variable $sql la instrucción INSERT
+        $sql="INSERT INTO $this->tabla($atributos) VALUES($datos)"; // INSERTAR DENTRO de $tabla en los ($atributos) los VALORES de ($datos)
+        // echo $sql.'<br />'; // Mostramos la instrucción sql resultante
         $this->_db->query($sql); // Ejecutamos la consulta
     }
 
     /**
-     * Elimina un registro
-     */
-    public function eliminar() {
-        // DELETE FROM articulos WHERE id=5
-        $sql = "DELETE FROM $this->tabla WHERE $this->criterio";
+     * Método para la actualización de datos 
+     * Modifica los registros de una tabla
+     * @param valores : los valores a modificar
+     */ 
+    public function actualizar($valores){
+        // UPDATE articulos SET precio = '35600' WHERE id='10'
+        $sql="UPDATE $this->tabla SET "; // ACTUALIZAR $tabla ESTABLECIENDO
+        // Para cada $valores como $key => $value
+        foreach ($valores as $key => $value) {
+            // Agregamos a la instrucción los campos ($key) y los valores ($value)
+            $sql .= $key."='".$value."',"; 
+        }
+        $sql= substr($sql,0,strlen($sql)-1); // Quitamos el último caracter (,) a $sql
+        // Agregamos a la instrucción el criterio
+        $sql .= " WHERE $this->criterio"; // DONDE $criterio
+        // echo $sql.'<br />'; // Mostramos la instruccón sql resultante
         $this->_db->query($sql); // Ejecutamos la consulta
     }
-    
 
+    /**
+     * Método para la eliminación de datos 
+     * Elimina los registros de una tabla
+     */ 
+    public function eliminar(){
+        // DELETE FROM articulos WHERE id='10'
+        // Guardamos en la variable $sql la instrucción DELETE
+        $sql="DELETE FROM $this->tabla WHERE $this->criterio"; // ELIMINAR DESDE $tabla DONDE $criterio
+        $this->_db->query($sql); // Ejecutamos la consulta
+    }
 }
+?> 
